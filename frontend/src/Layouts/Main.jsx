@@ -1,7 +1,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const API_BASE_URL = "http://localhost:8000";
+const API_BASE_URL =import.meta.env.VITE_API_URL
 
 const Main = ({
   pdf,
