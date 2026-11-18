@@ -123,12 +123,7 @@ const Main = ({
     }, 120000);
 
     try {
-      console.log(
-        "[PDF upload] Starting:",
-        file.name,
-        file.size,
-        "bytes"
-      );
+      
 
       const formData = new FormData();
       formData.append("file", file);
@@ -142,10 +137,7 @@ const Main = ({
         }
       );
 
-      console.log(
-        "[PDF upload] HTTP status:",
-        response.status
-      );
+      
 
       const responseText = await response.text();
 
@@ -159,7 +151,7 @@ const Main = ({
         );
       }
 
-      console.log("[PDF upload] Backend response:", data);
+      
 
       if (
         !response.ok ||
@@ -185,19 +177,14 @@ const Main = ({
         data.docId
       );
 
-      console.log("[PDF upload] Ready:", {
-        sessionId: newSessionId,
-        docId: data.docId,
-        fileName: file.name,
-        chunksStored: data.chunksStored,
-      });
+      
     } catch (error) {
       const message =
         error.name === "AbortError"
           ? "PDF processing timed out after 2 minutes. Check the backend terminal."
           : error.message || "Unknown upload error.";
 
-      console.error("[PDF upload] Failed:", error);
+      
 
       setUploadError(message);
 
@@ -343,10 +330,7 @@ const Main = ({
         JSON.stringify(updatedHistory)
       );
 
-      console.log(
-        "[Chat] Sending question for docId:",
-        currentDocId
-      );
+      
 
       const response = await fetch(
         `${API_BASE_URL}/ask`,
@@ -394,7 +378,7 @@ const Main = ({
         setChats(finalHistory);
       }
     } catch (error) {
-      console.error("[Chat] Request failed:", error);
+      
 
       const errorReply = {
         sender: "ai",
