@@ -16,4 +16,4 @@ COPY . .
 RUN deno cache main.ts
 
 # Run with necessary permissions
-CMD ["run", "--allow-net", "--allow-env","--alow-read", "main.ts"]
+CMD ["run", "--allow-net", "--allow-env", "main.ts"]
