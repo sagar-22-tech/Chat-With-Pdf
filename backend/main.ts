@@ -19,7 +19,7 @@ const ai = new GoogleGenAI({
   apiKey: GEMINI_API_KEY,
 });
 
-// ---------------- CORS ----------------
+// CORS
 
 app.use(
   "*",
@@ -31,7 +31,7 @@ app.use(
 );
 
 
-// ---------------- QDRANT HELPER ----------------
+// QDRANT HELPER
 
 async function qdrantRequest(
   endpoint: string,
@@ -57,7 +57,7 @@ async function qdrantRequest(
   return await response.json();
 }
 
-// ---------------- PDF TEXT EXTRACTION ----------------
+// PDF TEXT EXTRACTION
 
 async function extractPdfText(file: File): Promise<string> {
   const buffer = await file.arrayBuffer();
@@ -84,7 +84,7 @@ async function extractPdfText(file: File): Promise<string> {
   return extractedText.trim();
 }
 
-// ---------------- PDF INGESTION ----------------
+// PDF UPLOADING
 
 app.post("/ingest", async (c) => {
   try {
@@ -116,7 +116,7 @@ app.post("/ingest", async (c) => {
 
     console.log("Processing PDF:", file.name);
 
-    // Extract text from PDF
+    
     const extractedText = await extractPdfText(file);
 
     if (!extractedText) {
@@ -129,7 +129,7 @@ app.post("/ingest", async (c) => {
       );
     }
 
-    // Split text into chunks
+    
     const chunks = chunkText(extractedText);
 
     if (!chunks.length) {
@@ -142,17 +142,17 @@ app.post("/ingest", async (c) => {
       );
     }
 
-    // Generate embeddings
+    
     const vectors = await embedChunks(chunks);
 
     if (vectors.length !== chunks.length) {
       throw new Error("Embedding count does not match chunk count.");
     }
 
-    // Create a unique document ID
+   
     const docId = crypto.randomUUID();
 
-    // Prepare Qdrant points
+    
     const points = chunks.map((chunk, index) => ({
       id: crypto.randomUUID(),
       vector: vectors[index],
@@ -163,7 +163,7 @@ app.post("/ingest", async (c) => {
       },
     }));
 
-    // Store points directly through Qdrant REST API
+    
     await qdrantRequest(
       `/collections/${COLLECTION_NAME}/points?wait=true`,
       {
@@ -196,7 +196,7 @@ app.post("/ingest", async (c) => {
   }
 });
 
-// ---------------- CHAT WITH PDF ----------------
+// CHAT WITH PDF
 
 app.post("/ask", async (c) => {
   try {
@@ -220,7 +220,7 @@ app.post("/ask", async (c) => {
       );
     }
 
-    // Parse conversation history
+    
     let history: Array<{ sender: string; text: string }> = [];
 
     if (typeof historyString === "string") {
@@ -235,14 +235,14 @@ app.post("/ask", async (c) => {
       }
     }
 
-    // Generate embedding for the current question
+    
     const [queryVector] = await embedChunks([question]);
 
     if (!queryVector) {
       throw new Error("Could not generate question embedding.");
     }
 
-    // Search relevant PDF chunks using direct REST API
+   
     const searchResults = await qdrantRequest(
       `/collections/${COLLECTION_NAME}/points/query`,
       {
@@ -265,12 +265,12 @@ app.post("/ask", async (c) => {
       },
     );
 
-    // Safely access Qdrant response
+   
     const points = searchResults?.result?.points ?? [];
 
     console.log("Retrieved PDF chunks:", points.length);
 
-    // Extract relevant context
+    
     const context = points
       .map((point: { payload?: { text?: unknown } | null }) => point.payload?.text)
       .filter((text: unknown): text is string =>
@@ -278,7 +278,7 @@ app.post("/ask", async (c) => {
       )
       .join("\n\n---\n\n");
 
-    // Prepare conversation history
+    
     const conversationHistory = history
       .filter(
         (message) =>
@@ -296,7 +296,7 @@ app.post("/ask", async (c) => {
       })
       .join("\n");
 
-    // Build Gemini prompt
+    
     const prompt = `
 You are a helpful AI assistant that answers questions about an uploaded PDF.
 
@@ -320,7 +320,7 @@ ${question}
 ANSWER:
 `;
 
-    // Generate answer using Gemini
+    
     const response = await ai.models.generateContent({
       model: "gemini-3.1-flash-lite",
       contents: prompt,
@@ -353,7 +353,7 @@ ANSWER:
   }
 });
 
-// ---------------- SERVER ----------------
+// SERVER
 
 Deno.serve(
   {
