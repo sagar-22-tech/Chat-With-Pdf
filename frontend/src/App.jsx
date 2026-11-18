@@ -9,6 +9,7 @@ function App() {
   const [chats, setChats] = useState([]);
   const [sessionId, setSessionId] = useState(null);
   const [pendingFile, setPendingFile] = useState(null);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   // Load saved chat sessions.
   const [userChats, setUserChats] = useState(() => {
@@ -44,6 +45,7 @@ function App() {
 
     // Do not upload the PDF again.
     setPendingFile(null);
+    setMobileSidebarOpen(false);
   };
 
   // Start a fresh chat without uploading directly here.
@@ -51,10 +53,11 @@ function App() {
     if (!file) return;
 
     setPendingFile(file);
+    setMobileSidebarOpen(false);
   };
 
   return (
-    <div className="flex min-h-screen bg-black">
+    <div className="flex h-[100dvh] min-h-0 w-full overflow-hidden bg-black">
 
       {/* Sidebar */}
       <Sidebar
@@ -63,6 +66,8 @@ function App() {
         activeSessionId={sessionId}
         onSelectChat={handleSelectChat}
         onUploadFile={handleUploadFile}
+        mobileOpen={mobileSidebarOpen}
+        onClose={() => setMobileSidebarOpen(false)}
       />
 
       {/* Main Chat */}
@@ -77,6 +82,7 @@ function App() {
         setUserChats={setUserChats}
         pendingFile={pendingFile}
         clearPendingFile={() => setPendingFile(null)}
+        onOpenSidebar={() => setMobileSidebarOpen(true)}
       />
 
     </div>

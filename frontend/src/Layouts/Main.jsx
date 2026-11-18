@@ -1,7 +1,6 @@
-
 import { useEffect, useRef, useState } from "react";
 
-const API_BASE_URL =import.meta.env.VITE_API_URL
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const Main = ({
   pdf,
@@ -14,6 +13,7 @@ const Main = ({
   setUserChats,
   pendingFile,
   clearPendingFile,
+  onOpenSidebar,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [input, setInput] = useState("");
@@ -66,6 +66,7 @@ const Main = ({
 
       if (sessionIndex !== -1) {
         const updated = [...prevSessions];
+
         updated[sessionIndex] = {
           ...updated[sessionIndex],
           ...sessionData,
@@ -123,8 +124,6 @@ const Main = ({
     }, 120000);
 
     try {
-      
-
       const formData = new FormData();
       formData.append("file", file);
 
@@ -137,8 +136,6 @@ const Main = ({
         }
       );
 
-      
-
       const responseText = await response.text();
 
       let data;
@@ -150,8 +147,6 @@ const Main = ({
           `Backend returned a non-JSON response: ${responseText.slice(0, 300)}`
         );
       }
-
-      
 
       if (
         !response.ok ||
@@ -177,14 +172,11 @@ const Main = ({
         data.docId
       );
 
-      
     } catch (error) {
       const message =
         error.name === "AbortError"
           ? "PDF processing timed out after 2 minutes. Check the backend terminal."
           : error.message || "Unknown upload error.";
-
-      
 
       setUploadError(message);
 
@@ -330,8 +322,6 @@ const Main = ({
         JSON.stringify(updatedHistory)
       );
 
-      
-
       const response = await fetch(
         `${API_BASE_URL}/ask`,
         {
@@ -378,8 +368,6 @@ const Main = ({
         setChats(finalHistory);
       }
     } catch (error) {
-      
-
       const errorReply = {
         sender: "ai",
         text: `Error: ${error.message}`,
@@ -434,30 +422,66 @@ const Main = ({
   };
 
   return (
-    <main className="flex-1 flex flex-col min-h-screen bg-black px-4">
+    <main className="relative flex h-[100dvh] min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-black px-3 sm:px-4">
+
+      {/* Mobile Header */}
+      <div className="flex h-14 shrink-0 items-center gap-3 border-b border-neutral-900 md:hidden">
+
+        <button
+          type="button"
+          onClick={onOpenSidebar}
+          aria-label="Open navigation menu"
+          className="-ml-1 rounded-xl p-2 text-neutral-200 hover:bg-neutral-900"
+        >
+          <svg
+            className="h-6 w-6"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path
+              strokeLinecap="round"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
+
+        <span className="text-base font-semibold text-white">
+          Chat <span className="text-slate-300">PDF</span>
+        </span>
+
+        {pdf?.name && (
+          <span className="ml-auto max-w-[48%] truncate text-xs text-neutral-400">
+            {pdf.name}
+          </span>
+        )}
+      </div>
+
       {!pdf ? (
         // PDF UPLOAD SCREEN
-        <div className="flex-1 flex flex-col items-center justify-center gap-4 py-8">
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 overflow-y-auto py-6 sm:py-8">
+
           <div className="heading text-center max-w-2xl">
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight font-sans text-white">
+            <h1 className="text-3xl font-bold tracking-tight font-sans text-white sm:text-4xl md:text-5xl">
               Chat with{" "}
               <span className="text-slate-300">
                 your PDF
               </span>
             </h1>
 
-            <p className="mt-4 text-lg md:text-xl text-slate-300">
+            <p className="mt-3 text-base text-slate-300 sm:mt-4 sm:text-lg md:text-xl">
               Upload a document and ask questions, get instant answers
             </p>
           </div>
 
-          <div className="w-full max-w-2xl mx-auto p-4">
+          <div className="mx-auto w-full max-w-2xl p-2 sm:p-4">
             <label
               htmlFor="pdf-upload"
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              className={`flex flex-col items-center justify-center w-full py-10 px-6 bg-neutral-950 border border-dashed rounded-3xl cursor-pointer transition ${
+              className={`flex flex-col items-center justify-center w-full py-9 px-4 sm:px-6 sm:py-10 bg-neutral-950 border border-dashed rounded-3xl cursor-pointer transition ${
                 isDragging
                   ? "border-white bg-neutral-900"
                   : "border-neutral-500 hover:border-white hover:bg-neutral-900/50"
@@ -532,17 +556,19 @@ const Main = ({
         </div>
       ) : (
         // CHAT SCREEN
-        <div className="flex-1 flex flex-col w-full max-w-4xl mx-auto py-6">
+        <div className="mx-auto flex min-h-0 w-full max-w-4xl flex-1 flex-col overflow-hidden py-3 sm:py-6">
+
           {/* DOCUMENT HEADER */}
-          <div className="flex items-center justify-between bg-neutral-900/70 border border-neutral-800 rounded-2xl px-4 py-3 mb-4">
-            <span className="text-sm text-neutral-200 truncate">
+          <div className="mb-3 flex shrink-0 items-center justify-between gap-3 rounded-2xl border border-neutral-800 bg-neutral-900/70 px-3 py-3 sm:mb-4 sm:px-4">
+
+            <span className="min-w-0 truncate text-xs text-neutral-200 sm:text-sm">
               📄{" "}
               <strong className="text-white">
                 {pdf.name}
               </strong>
             </span>
 
-            <span className="text-xs text-neutral-400">
+            <span className="shrink-0 text-[10px] text-neutral-400 sm:text-xs">
               {isUploading
                 ? "Uploading and indexing..."
                 : docId
@@ -559,7 +585,7 @@ const Main = ({
 
           {/* CHAT MESSAGES */}
           {chats.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center text-neutral-500 text-sm">
+            <div className="flex min-h-0 flex-1 items-center justify-center px-4 text-center text-sm text-neutral-500">
               {isUploading
                 ? "Extracting text, generating embeddings and storing your PDF..."
                 : docId
@@ -567,11 +593,12 @@ const Main = ({
                 : "Waiting for the PDF to finish processing..."}
             </div>
           ) : (
-            <div className="flex-1 flex flex-col gap-3 overflow-y-auto pb-4">
+            <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-0.5 pb-4">
+
               {chats.map((msg, idx) => (
                 <div
                   key={idx}
-                  className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap ${
+                  className={`max-w-[92%] break-words rounded-2xl px-3 py-2.5 text-sm whitespace-pre-wrap [overflow-wrap:anywhere] sm:max-w-[80%] sm:px-4 ${
                     msg.sender === "user"
                       ? "bg-white text-black self-end"
                       : "bg-neutral-900 text-neutral-200 self-start border border-neutral-800"
@@ -588,6 +615,7 @@ const Main = ({
               {/* THINKING ANIMATION */}
               {isAsking && (
                 <div className="flex items-center gap-3 self-start bg-neutral-900 border border-neutral-800 rounded-2xl px-5 py-3">
+
                   <span className="text-sm text-neutral-400">
                     Thinking
                   </span>
@@ -605,7 +633,7 @@ const Main = ({
           {/* MESSAGE INPUT */}
           <form
             onSubmit={handleSubmit}
-            className="flex items-center gap-3 bg-neutral-900 border border-neutral-800 rounded-2xl px-4 py-2 mt-4"
+            className="mt-2 flex shrink-0 items-end gap-2 rounded-2xl border border-neutral-800 bg-neutral-900 px-3 py-2 sm:mt-4 sm:gap-3 sm:px-4"
           >
             <input
               type="text"
@@ -617,7 +645,7 @@ const Main = ({
                   ? "Uploading PDF..."
                   : `Ask anything about ${pdf.name}...`
               }
-              className="flex-1 bg-transparent text-white placeholder-neutral-400 text-base focus:outline-none disabled:opacity-50"
+              className="min-w-0 flex-1 bg-transparent py-2 text-base text-white placeholder-neutral-500 focus:outline-none disabled:opacity-50"
             />
 
             <button
@@ -628,7 +656,7 @@ const Main = ({
                 !docId ||
                 !input.trim()
               }
-              className="flex items-center justify-center w-11 h-11 bg-white text-black rounded-full hover:bg-neutral-200 transition shrink-0 disabled:opacity-50"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-black transition hover:bg-neutral-200 disabled:opacity-50"
               title="Send message"
             >
               <svg
