@@ -84,6 +84,12 @@ async function extractPdfText(file: File): Promise<string> {
   return extractedText.trim();
 }
 
+//HEALTH CHECKPOINT
+app.get("/health", (c) => (c.json({
+  message: "Server is working",
+  status: 200
+})))
+
 // PDF UPLOADING
 
 app.post("/ingest", async (c) => {
@@ -362,4 +368,4 @@ Deno.serve(
   app.fetch,
 );
 
-console.log(`Listening on http://localhost:${PORT}/`);
+
